@@ -87,6 +87,13 @@ class Config implements ConfigContract
     }
 
     /**
+     * @return string
+     */
+    public function getBaseUrl(){
+        return $this->baseUrl;
+    }
+
+    /**
      * @return bool
      */
     public function isUrlWithRealm()

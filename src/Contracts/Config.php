@@ -10,6 +10,11 @@ interface Config
     public function getUrl();
 
     /**
+     * @return string
+     */
+    public function getBaseUrl();
+
+    /**
      * @return bool
      */
     public function isUrlWithRealm();

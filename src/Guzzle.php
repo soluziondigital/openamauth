@@ -15,12 +15,12 @@ class Guzzle implements GuzzleContract
     /**
      * @var string
      */
-    protected $usersUri = "/json/realms/root/users";
+    protected $usersUri = "/users";
 
     /**
      * @var string
      */
-    protected $authUri = "/json/realms/root/authenticate";
+    protected $authUri = "/authenticate";
 
     /**
      * @var string
@@ -131,7 +131,7 @@ class Guzzle implements GuzzleContract
      */
     public function validateTokenId($token){
         //Convert USER uri string to Guzzle uri resource
-        $uriRes = GuzzlePsr7\uri_for($this->url . "/json/sessions/?tokenId=" . $token . "&_action=validate");
+        $uriRes = GuzzlePsr7\uri_for($this->config->getBaseUrl() . "/sessions/?tokenId=" . $token . "&_action=validate");
 
         //Make POST call with auth token to validate it
         try{

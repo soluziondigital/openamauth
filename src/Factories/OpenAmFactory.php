@@ -4,6 +4,7 @@ namespace Maenbn\OpenAmAuth\Factories;
 
 
 use Maenbn\OpenAmAuth\Contracts\Config;
+use Maenbn\OpenAmAuth\Guzzle;
 use Maenbn\OpenAmAuth\OpenAm;
 
 class OpenAmFactory
@@ -16,9 +17,10 @@ class OpenAmFactory
     {
         $curlFactory =  new CurlFactory();
         $strategyFactory = new StrategiesFactory();
+        $guzzle = new Guzzle($config);
         $curl = $curlFactory->newCurl();
         $curl->setResultFormat($strategyFactory->newJsonToObject());
 
-        return new OpenAm($config, $curl);
+        return new OpenAm($config, $curl, $guzzle);
     }
 }
