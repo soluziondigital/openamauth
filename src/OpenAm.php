@@ -5,6 +5,7 @@ namespace Maenbn\OpenAmAuth;
 use Maenbn\OpenAmAuth\Contracts\Curl as CurlContract;
 use Maenbn\OpenAmAuth\Contracts\Config AS ConfigContract;
 use Maenbn\OpenAmAuth\Contracts\OpenAm as OpenAmContract;
+use Maenbn\OpenAmAuth\Contracts\Guzzle as GuzzleContract;
 
 class OpenAm implements OpenAmContract
 {
@@ -12,6 +13,16 @@ class OpenAm implements OpenAmContract
      * @var Config
      */
     private $config;
+
+    /**
+     * @var Guzzle
+     */
+    private $guzzle;
+
+    /**
+     * @var string
+     */
+    private $url;
 
     /**
      * @var Curl
@@ -33,10 +44,12 @@ class OpenAm implements OpenAmContract
      */
     protected $user;
 
-    public function __construct(ConfigContract $config, CurlContract $curl)
+    public function __construct(ConfigContract $config, CurlContract $curl, GuzzleContract $guzzle)
     {
         $this->config = $config;
         $this->curl = $curl;
+        $this->guzzle = $guzzle;
+        $this->url = $this->config->setUrlWithRealm(true)->getUrl();
         $this->setConfigCookieData();
     }
 
@@ -62,7 +75,7 @@ class OpenAm implements OpenAmContract
      */
     protected function setCurlHeadersAndOptions()
     {
-        $this->curl->setHeaders(['Content-Type: application/json'])
+        $this->curl->setHeaders(['Content-Type: application/json','Accept-API-Version: resource=2.0, protocol=1.0'])
             ->setOptions([CURLOPT_RETURNTRANSFER => true, CURLOPT_HEADER => false]);
         return $this->curl;
     }
@@ -115,14 +128,14 @@ class OpenAm implements OpenAmContract
      * @param $username
      * @param $password
      * @return bool
+     * @throws \Exception
      */
     public function authenticate($username, $password)
     {
-        $credentials = ['X-OpenAM-Username: ' . $username, 'X-OpenAM-Password: ' . $password];
-        $url = $this->config->setUrlWithRealm(true)->getUrl() . '/authenticate';
-        $response = $this->setCurlHeadersAndOptions()->setUrl($url)->post($credentials);
-        if(isset($response->tokenId)){
-            $tokenValid= $this->setTokenId($response->tokenId)->validateTokenId();
+        $tokenId = $this->guzzle->getUserToken($username, $password);
+
+        if(isset($tokenId)){
+            $tokenValid= $this->setTokenId($tokenId)->setUid($username)->validateTokenId();
             $this->setUser();
             return $tokenValid;
         }
@@ -145,9 +158,9 @@ class OpenAm implements OpenAmContract
         $baseResponse->valid = false;
         $baseResponse->uid = null;
 
-        $url = $this->config->getUrl() . '/sessions/?tokenId=' . $this->getTokenId() . '&_action=validate';
-        $response = $this->setCurlHeadersAndOptions()->setUrl($url)->post();
+        $response = $this->guzzle->validateTokenId($this->getTokenId());
         $response = (object) array_merge((array) $baseResponse, (array) $response);
+
 
         $this->setUid($response->uid);
 
@@ -167,6 +180,7 @@ class OpenAm implements OpenAmContract
      * setTokenId and setUid methods respectively
      *
      * @return $this
+     * @throws \Exception
      */
     public function setUser()
     {
@@ -174,9 +188,7 @@ class OpenAm implements OpenAmContract
             return $this;
         }
 
-        $url = $this->config->setUrlWithRealm(true)->getUrl() . '/users/' . $this->getUid();
-        $header = $this->config->getCookieName() . ':' . $this->getTokenId();
-        $this->user = $this->setCurlHeadersAndOptions()->setUrl($url)->appendToHeaders([$header])->get();
+        $this->user = $this->guzzle->getUserInformation($this->getUid());
 
         return $this;
     }
@@ -188,9 +200,7 @@ class OpenAm implements OpenAmContract
      */
     public function logout()
     {
-        $url = $this->config->setUrlWithRealm(true)->getUrl() . '/sessions/?_action=logout';
-        $header = $this->config->getCookieName()  . ':' . $this->getTokenId();
-        $response = $this->setCurlHeadersAndOptions()->setUrl($url)->appendToHeaders([$header])->post();
+        $response = $this->guzzle->logout();
 
         if(isset($response->result) && $response->result == 'Successfully logged out'){
             $this->setTokenId(null);

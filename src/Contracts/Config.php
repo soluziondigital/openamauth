@@ -32,13 +32,35 @@ interface Config
     public function setCookieName($cookieName);
 
     /**
+     * @return null|string
+     */
+    public function getAdminUser();
+
+    /**
+     * @param string $adminUser
+     * @return $this
+     */
+    public function setAdminUser($adminUser);
+
+    /**
+     * @return null|string
+     */
+    public function getAdminPassword();
+
+    /**
+     * @param string $adminPassword
+     * @return $this
+     */
+    public function setAdminPassword($adminPassword);
+
+    /**
      * @return null|bool
      */
     public function getSecureCookie();
 
     /**
-     * @param string $cookieSecure
+     * @param string $secureCookie
      * @return $this
      */
-    public function setSecureCookie($cookieSecure);
+    public function setSecureCookie($secureCookie);
 }
