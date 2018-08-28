@@ -25,6 +25,16 @@ class Config implements ConfigContract
     /**
      * @var string
      */
+    protected $cookiePath;
+
+    /**
+     * @var string
+     */
+    protected $cookieDomain;
+
+    /**
+     * @var string
+     */
     protected $adminUser;
 
     /**
@@ -126,6 +136,42 @@ class Config implements ConfigContract
     public function setCookieName($cookieName)
     {
         $this->cookieName = $cookieName;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCookiePath()
+    {
+        return $this->cookiePath;
+    }
+
+    /**
+     * @param string $cookieName
+     * @return $this
+     */
+    public function setCookiePath($cookiePath)
+    {
+        $this->cookiePath = $cookiePath;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCookieDomain()
+    {
+        return $this->cookieDomain;
+    }
+
+    /**
+     * @param string $cookieName
+     * @return $this
+     */
+    public function setCookieDomain($cookieDomain)
+    {
+        $this->cookieDomain = $cookieDomain;
         return $this;
     }
 

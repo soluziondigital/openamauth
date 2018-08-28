@@ -117,8 +117,14 @@ class Guzzle implements GuzzleContract
                 $authResult = json_decode($authResonse->getBody()->getContents());
 
                 //Return token
-                $this->userToken = $authResult->tokenId;
-                return $authResult->tokenId;
+                $this->userToken = urldecode($authResult->tokenId);
+                setrawcookie (
+                    config('openam.cookieName'),
+                    $this->userToken,
+                    0,
+                    config('openam.cookiePath'),
+                    config('openam.cookieDomain'));
+                return $this->userToken;
             } catch (GuzzleException $ge){
                 throw new \Exception($ge->getMessage(), 555);
             }
