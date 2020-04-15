@@ -35,6 +35,11 @@ class Config implements ConfigContract
     /**
      * @var string
      */
+    protected $cookieDuration;
+
+    /**
+     * @var string
+     */
     protected $adminUser;
 
     /**
@@ -172,6 +177,24 @@ class Config implements ConfigContract
     public function setCookieDomain($cookieDomain)
     {
         $this->cookieDomain = $cookieDomain;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCookieDuration()
+    {
+        return $this->cookieDuration;
+    }
+
+    /**
+     * @param string $cookieDuration
+     * @return $this
+     */
+    public function setCookieDuration($cookieDuration)
+    {
+        $this->cookieDuration = $cookieDuration;
         return $this;
     }
 
