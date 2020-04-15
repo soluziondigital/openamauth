@@ -121,7 +121,7 @@ class Guzzle implements GuzzleContract
                 setrawcookie (
                     config('openam.cookieName'),
                     $this->userToken,
-                    config('openam.cookieDuration'),
+                    0,
                     config('openam.cookiePath'),
                     config('openam.cookieDomain'));
                 return $this->userToken;
