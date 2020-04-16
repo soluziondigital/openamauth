@@ -2,6 +2,7 @@
 
 namespace Maenbn\OpenAmAuth;
 
+use GuzzleHttp\Cookie\SetCookie as CookieParser;
 use Maenbn\OpenAmAuth\Contracts\Config as ConfigContract;
 use Maenbn\OpenAmAuth\Contracts\Guzzle as GuzzleContract;
 
@@ -113,17 +114,24 @@ class Guzzle implements GuzzleContract
                     ]
                 ]);
 
+                $cookieParser = new CookieParser();
+                foreach ($authResonse->getHeaders()['Set-Cookie'] as $cookie){
+                    $cookie = $cookieParser->fromString($cookie);
+                    setrawcookie (
+                        $cookie->getName(),
+                        $cookie->getValue(),
+                        $cookie->getExpires(),
+                        $cookie->getPath(),
+                        $cookie->getDomain()
+                    );
+                }
+
                 //Decode json string from the response body
                 $authResult = json_decode($authResonse->getBody()->getContents());
 
                 //Return token
                 $this->userToken = urldecode($authResult->tokenId);
-                setrawcookie (
-                    config('openam.cookieName'),
-                    $this->userToken,
-                    0,
-                    config('openam.cookiePath'),
-                    config('openam.cookieDomain'));
+
                 return $this->userToken;
             } catch (GuzzleException $ge){
                 throw new \Exception($ge->getMessage(), 555);
